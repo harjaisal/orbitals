@@ -4,12 +4,12 @@ body {
 
 canvas {
     display: block;
-    margin-left: 200px;
+    margin-left: 300px;
 }
 
 .sidebar {
     height: 100%;
-    width: 200px;
+    width: 300px;
     position: fixed;
     top: 0;
     left: 0;
@@ -21,6 +21,13 @@ h1 {
     font-family: 'Arial';
     color: white;
     font-size: 28px;
+}
+
+h2 {
+    margin-left: 16px;
+    font-family: 'Arial';
+    color: lightgrey;
+    font-size: 22px;
 }
 
 h3 {

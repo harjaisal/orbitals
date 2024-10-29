@@ -2,19 +2,21 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // TODO
-// ui to adjust params
-// add all wavefunctions/casing behavior
+// ui to adjust params/orbital
+
+const orbital = {n: 3, l: 1, subshell: "y"}
 
 const numPoints = 1000000; // number of points initially generated
 const maxRadius = 50000; // radius of points initially generated
-const vertexRadius = 1 // radius of each point
-const thresholdProbability = 0.95; // removes this proportion of the points with the lowest density
+const vertexRadius = 0.1 // radius of each point
+const thresholdProbability = 0.9; // removes this proportion of the points with the lowest density
 const posPhaseColor = 0xff0000; // color in regions where psi is positive
 const negPhaseColor = 0x00ff00; // color in regions where psi is negative
 const rotationRate = 0.003 // controls speed of automatic rotation
+const probabilityColoringMode = 2 // 0: constant, 1: linear grad, 2: exponential grad
 
-const initialZPosition = 10000; // initial camera position
-const sidebarWidth = 200; // width of sidebar
+const initialZPosition = 17500; // initial camera position
+const sidebarWidth = 300; // width of sidebar
 
 const height = window.innerHeight
 const width = window.innerWidth - sidebarWidth
@@ -32,9 +34,76 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.8;
 
-// ADD DYNAMIC Z POSITIONING
 camera.position.z = initialZPosition;
-controls.update()
+camera.updateProjectionMatrix();
+controls.update();
+
+function wavefunction({n, l, subshell}, {rho, theta, phi}) {
+    const a0 = 529 // scaled by 1000 to improve resolution
+    const sigma = rho / a0
+
+    if (n === 1) {
+        if (l === 0) {
+            if (subshell === "n/a") {
+                // 1s
+                return (1 / ((Math.PI ** 0.5) * (a0 ** 1.5))) * Math.exp(-sigma)
+            }
+        }
+    } else if (n === 2) {
+        if (l === 0) {
+            if (subshell === "n/a") {
+                // 2s
+                return 1 / (4 * ((2 * Math.PI) ** 0.5) * (a0 ** 1.5)) * (2 - sigma) * Math.exp(-sigma / 2)
+            }
+        } else if (l === 1) {
+            if (subshell === "x") {
+                // 2px
+                return 1 / (4 * ((2 * Math.PI) ** 0.5) * (a0 ** 1.5)) * sigma * Math.exp(-sigma / 2) * Math.sin(phi) * Math.cos(theta)
+            } else if (subshell === "y") {
+                // 2py
+                return 1 / (4 * ((2 * Math.PI) ** 0.5) * (a0 ** 1.5)) * sigma * Math.exp(-sigma / 2) * Math.sin(phi) * Math.sin(theta)
+            } else if (subshell === "z") {
+                // 2pz
+                return 1 / (4 * ((2 * Math.PI) ** 0.5) * (a0 ** 1.5)) * sigma * Math.exp(-sigma / 2) * Math.cos(phi)
+            }
+        }
+    } else if (n === 3) {
+        if (l === 0) {
+            if (subshell === "n/a") {
+                // 3s
+                return 1 / (81 * ((3 * Math.PI) ** 0.5) * (a0 ** 1.5)) * (27 - 18 * sigma + 2 * (sigma ** 2)) * Math.exp(-sigma / 3)
+            }
+        } else if (l === 1) {
+            if (subshell === "x") {
+                // 3px
+                return (2 ** 0.5) / (81 * (Math.PI ** 0.5) * (a0 ** 1.5)) * (6 * sigma - (sigma ** 2)) * Math.exp(-sigma / 3) * Math.sin(phi) * Math.cos(theta)
+            } else if (subshell === "y") {
+                // 3py
+                return (2 ** 0.5) / (81 * (Math.PI ** 0.5) * (a0 ** 1.5)) * (6 * sigma - (sigma ** 2)) * Math.exp(-sigma / 3) * Math.sin(phi) * Math.sin(theta)
+            } else if (subshell === "z") {
+                // 3pz
+                return (2 ** 0.5) / (81 * (Math.PI ** 0.5) * (a0 ** 1.5)) * (6 * sigma - (sigma ** 2)) * Math.exp(-sigma / 3) * Math.cos(phi)
+            }
+        } else if (l === 2) {
+            if (subshell === "xz") {
+                // 3dxz
+                return (2 ** 0.5) / (81 * (Math.PI ** 0.5) * (a0 ** 1.5)) * (sigma ** 2) * Math.exp(-sigma / 3) * Math.sin(phi) * Math.cos(phi) * Math.cos(theta)
+            } else if (subshell === "yz") {
+                // 3dyz
+                return (2 ** 0.5) / (81 * (Math.PI ** 0.5) * (a0 ** 1.5)) * (sigma ** 2) * Math.exp(-sigma / 3) * Math.sin(phi) * Math.cos(phi) * Math.sin(theta)
+            } else if (subshell === "xy") {
+                // 3dxy
+                return 1 / (81 * ((2 * Math.PI) ** 0.5) * (a0 ** 1.5)) * (sigma ** 2) * Math.exp(-sigma / 3) * (Math.sin(phi) ** 2) * Math.sin(2 * theta)
+            } else if (subshell === "z^2") {
+                // 3dz^2
+                return 1 / (81 * ((6 * Math.PI) ** 0.5) * (a0 ** 1.5)) * (sigma ** 2) * Math.exp(-sigma / 3) * (3 * (Math.cos(phi) ** 2) - 1)
+            } else if (subshell === "x^2-y^2") {
+                // 3dx^2-y^2
+                return 1 / (81 * ((2 * Math.PI) ** 0.5) * (a0 ** 1.5)) * (sigma ** 2) * Math.exp(-sigma / 3) * (Math.sin(phi) ** 2) * Math.cos(2 * theta)
+            }
+        }
+    }
+}
 
 function genVertices(numPoints, maxRadius) {
     const vertices = [];
@@ -61,11 +130,7 @@ function genProbabiltyDensity(vertices) {
     for (let i = 0; i < vertices.length; i++) {
         const { x, y, z, rho, theta, phi } = vertices[i]
 
-        const a0 = 0.529 // MAY ENED TO SCALE THIS BY 1000
-        const sigma = rho / a0
-
-        // for 3dz^2 ADD CASING
-        const psi = (1 / ((81 * Math.sqrt(6 * Math.PI)) * (529 ** 1.5))) * (rho / 529) ** 2 * Math.exp((rho / 529) / -3) * (3 * (Math.cos(phi)) ** 2 - 1);
+        const psi = wavefunction(orbital, {rho: rho, theta: theta, phi: phi})
 
         const psiSquared = psi ** 2
 
@@ -132,7 +197,7 @@ function computeColorsFromProbability(vertexData, posPhaseColor, negPhaseColor, 
 const vertices = genVertices(numPoints, maxRadius)
 const { vertexData, maxDensity } = genProbabiltyDensity(vertices)
 const filteredVertexData = filterVerticesByDensity(vertexData, maxDensity, thresholdProbability)
-const colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, 2)
+const colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
 
 const vertexBufferFormat = filteredVertexData.flatMap((vertex) => [vertex.x, vertex.y, vertex.z])
 const colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
