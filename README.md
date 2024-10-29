@@ -1,0 +1,1 @@
+This web app generates orbitals probabalistically and displays them using three.js to improve chemistry education. It allows students to properly view orbitals, particularly those with large principal quantum numbers, and to rotate and translate them. This allows them to gain a better understanding of orbital shapes and how they interact with one another.
