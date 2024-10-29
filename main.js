@@ -15,7 +15,7 @@ document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls( camera, renderer.domElement );
 controls.enableDamping = true; // smooth rotation
-controls.dampingFactor = 0.2;
+controls.dampingFactor = 0.8;
 
 camera.position.z = 10;
 controls.update()
