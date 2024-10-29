@@ -4,15 +4,15 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 // TODO
 // ui to adjust params/orbital
 
-const orbital = {n: 3, l: 2, subshell: "z^2"}
+const orbital = { n: 3, l: 1, subshell: "x" }
 
 const numPoints = 500000; // number of points initially generated
 const maxRadius = 50000; // radius of points initially generated
 const vertexRadius = 0.1 // radius of each point
 const thresholdProbability = 0.9; // removes this proportion of the points with the lowest density
-const posPhaseColor = 0xff0000; // color in regions where psi is positive
-const negPhaseColor = 0x00ff00; // color in regions where psi is negative
-const rotationRate = 0.003 // controls speed of automatic rotation
+let posPhaseColor = 0xff0000; // color in regions where psi is positive
+let negPhaseColor = 0x00ff00; // color in regions where psi is negative
+let rotationRate = 0.003 // controls speed of automatic rotation
 const probabilityColoringMode = 2 // 0: constant, 1: linear grad, 2: exponential grad
 
 const initialZPosition = 17500; // initial camera position
@@ -38,20 +38,20 @@ camera.position.z = initialZPosition;
 camera.updateProjectionMatrix();
 controls.update();
 
-function wavefunction({n, l, subshell}, {rho, theta, phi}) {
+function wavefunction({ n, l, subshell }, { rho, theta, phi }) {
     const a0 = 529 // scaled by 1000 to improve resolution
     const sigma = rho / a0
 
     if (n === 1) {
         if (l === 0) {
-            if (subshell === "n/a") {
+            if (subshell === "N/A") {
                 // 1s
                 return (1 / ((Math.PI ** 0.5) * (a0 ** 1.5))) * Math.exp(-sigma)
             }
         }
     } else if (n === 2) {
         if (l === 0) {
-            if (subshell === "n/a") {
+            if (subshell === "N/A") {
                 // 2s
                 return 1 / (4 * ((2 * Math.PI) ** 0.5) * (a0 ** 1.5)) * (2 - sigma) * Math.exp(-sigma / 2)
             }
@@ -69,7 +69,7 @@ function wavefunction({n, l, subshell}, {rho, theta, phi}) {
         }
     } else if (n === 3) {
         if (l === 0) {
-            if (subshell === "n/a") {
+            if (subshell === "N/A") {
                 // 3s
                 return 1 / (81 * ((3 * Math.PI) ** 0.5) * (a0 ** 1.5)) * (27 - 18 * sigma + 2 * (sigma ** 2)) * Math.exp(-sigma / 3)
             }
@@ -130,7 +130,7 @@ function genProbabiltyDensity(vertices) {
     for (let i = 0; i < vertices.length; i++) {
         const { x, y, z, rho, theta, phi } = vertices[i]
 
-        const psi = wavefunction(orbital, {rho: rho, theta: theta, phi: phi})
+        const psi = wavefunction(orbital, { rho: rho, theta: theta, phi: phi })
 
         const psiSquared = psi ** 2
 
@@ -222,8 +222,8 @@ function animate() {
 animate();
 
 window.addEventListener('resize', () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.aspect = window.innerWidth / window.innerHeight;
+    renderer.setSize(window.innerWidth - sidebarWidth, window.innerHeight);
+    camera.aspect = (window.innerWidth - sidebarWidth) / window.innerHeight;
     camera.updateProjectionMatrix();
     controls.update()
 });
@@ -235,3 +235,25 @@ window.addEventListener('mousedown', () => {
 window.addEventListener('mouseup', () => {
     mousedown = false;
 })
+
+function changePositivePhaseColor(newVal) {
+    posPhaseColor = parseInt(newVal.replace('#', '0x'), 16)
+
+    const colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
+    const colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorBufferFormat, 3));
+}
+
+function changeNegativePhaseColor(newVal) {
+    negPhaseColor = parseInt(newVal.replace('#', '0x'), 16)
+
+    const colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
+    const colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorBufferFormat, 3));
+}
+
+function changeRotationRate(newVal) {
+    rotationRate = parseFloat(newVal)
+}
+
+export { changePositivePhaseColor, changeNegativePhaseColor, changeRotationRate }

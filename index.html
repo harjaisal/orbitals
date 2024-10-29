@@ -1,56 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Orbital Visualization</title>
-        <link rel="icon" type="image/x-icon" href="/favicon.ico?">
-		<link rel="stylesheet" type="text/css" href="styles.css" />
-	</head>
-	<body>
-        <div class="sidebar">
-            <h1>Parameters</h1>
-            <h2>Orbital Settings</h2>
-            <h3>Principal Quantum Number (n)</h3>
-            <select>
-                <option>1</option>
-                <option>2</option>
-                <option selected>3</option>
-            </select>
-            <h3>Azimuthal Quantum Number (l)</h3>
-            <select>
-                <option>0 (s orbital)</option>
-                <option selected>1 (p orbital)</option>
-                <option>2 (d orbital)</option>
-            </select>
-            <h3>Suborbital</h3>
-            <select>
-                <option>0 (s orbital)</option>
-                <option>1 (p orbital)</option>
-                <option>2 (d orbital)</option>
-            </select>
-            <h1>Zoom in and out, and rotate the orbital using your mouse!</h1>
-            <h2>Renderer Settings</h2>
-            <h3>Number of Points</h3>
-            <input type="number" value="500000" min="5000" max="10000000" step="100000" />
-            <h3>Sampling Radius</h3>
-            <input type="number" value="50000" min=5000 max=1000000 step="10000"/>
-            <h3>Required Probability to Show</h3>
-            <input type="number" value="0.9" min="0.01" max="0.99" step="0.01" />
-            <h3>Voxel Radius</h3>
-            <input type="number" value="0.1" min="0.01" max="5" step="0.1" />
-            <h3>Probability Coloring Mode</h3>
-            <select>
-                <option>Constant</option>
-                <option>Linear</option>
-                <option selected>Exponential</option>
-            </select>
-            <h3>Positive Phase Color</h3>
-            <input type="color" value="#ff0000" class="colorpicker" />
-            <h3>Negative Phase Color</h3>
-            <input type="color" value="#00ff00" class="colorpicker" />
-            <h3>Rotation Rate</h3>
-            <input type="number" value="0.003" min="0" max="1" step="0.001" />
-        </div>
-		<script type="module" src="/main.js"></script>
-	</body>
+
+<head>
+    <meta charset="utf-8">
+    <title>Orbital Visualization</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?">
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <script type="module" src="/main.js"></script>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h1>Parameters</h1>
+        <h2>Orbital Settings</h2>
+        <h3>Principal Quantum Number (n)</h3>
+        <select>
+            <option>1</option>
+            <option>2</option>
+            <option selected>3</option>
+        </select>
+        <h3>Azimuthal Quantum Number (l)</h3>
+        <select id="orbital">
+            <option>0 (s orbital)</option>
+            <option selected>1 (p orbital)</option>
+            <option>2 (d orbital)</option>
+        </select>
+        <h3>Suborbital</h3>
+        <select id="suborbital">
+            <option selected>px</option>
+            <option>py</option>
+            <option>pz</option>
+        </select>
+        <script>
+            const optionsData = { "0 (s orbital)": ["N/A"], "1 (p orbital)": ["px", "py", "pz"], "2 (d orbital)": ["dxz", "dyz", "dxy", "dz^2", "dx^2-y^2"] }
+
+            const orbitalDropdown = document.getElementById("orbital");
+            const suborbitalDropdown = document.getElementById("suborbital");
+
+            orbitalDropdown.addEventListener("change", () => {
+                suborbitalDropdown.innerHTML = "";
+
+                const selectedOrbital = orbitalDropdown.value;
+                console.log(selectedOrbital)
+
+                if (optionsData[selectedOrbital]) {
+                    optionsData[selectedOrbital].forEach(orbital => {
+                        const newOption = document.createElement("option");
+                        newOption.value = orbital.toLowerCase();
+                        newOption.textContent = orbital;
+                        suborbitalDropdown.appendChild(newOption);
+                    });
+                }
+            })
+        </script>
+        <h1>Zoom in and out, and rotate the orbital using your mouse!</h1>
+        <h2>Renderer Settings</h2>
+        <h3>Number of Points</h3>
+        <input id="numpoints" type="number" value="500000" min="5000" max="10000000" step="100000" />
+        <!-- <script>
+            const numPointsInput = document.getElementById("numpoints");
+
+            numPointsInput.addEventListener("change", () => {
+
+            });
+        </script> -->
+        <h3>Sampling Radius</h3>
+        <input type="number" value="50000" min=5000 max=1000000 step="10000" />
+        <!-- <script>
+            const numPointsInput = document.getElementById("numpoints");
+
+            numPointsInput.addEventListener("change", () => {
+                
+            });
+        </script> -->
+        <h3>Required Probability to Show</h3>
+        <input type="number" value="0.9" min="0.01" max="0.99" step="0.01" />
+        <!-- <script>
+            const numPointsInput = document.getElementById("numpoints");
+
+            numPointsInput.addEventListener("change", () => {
+                
+            });
+        </script> -->
+        <h3>Voxel Radius</h3>
+        <input type="number" value="0.1" min="0.01" max="5" step="0.1" />
+        <!-- <script>
+            const numPointsInput = document.getElementById("numpoints");
+
+            numPointsInput.addEventListener("change", () => {
+                
+            });
+        </script> -->
+        <h3>Probability Coloring Mode</h3>
+        <select>
+            <option>Constant</option>
+            <option>Linear</option>
+            <option selected>Exponential</option>
+        </select>
+        <!-- <script>
+            const numPointsInput = document.getElementById("numpoints");
+
+            numPointsInput.addEventListener("change", () => {
+                
+            });
+        </script> -->
+        <h3>Positive Phase Color</h3>
+        <input id="positivephasecolor" type="color" value="#ff0000" class="colorpicker" />
+        <script type="module">
+            import { changePositivePhaseColor } from './main.js'
+
+            const positivePhaseColorInput = document.getElementById("positivephasecolor");
+
+            positivePhaseColorInput.addEventListener("change", () => {
+                const newValue = positivePhaseColorInput.value;
+
+                changePositivePhaseColor(newValue);
+            });
+        </script>
+        <h3>Negative Phase Color</h3>
+        <input id="negativephasecolor" type="color" value="#00ff00" class="colorpicker" />
+        <script type="module">
+            import { changeNegativePhaseColor } from './main.js'
+
+            const negativePhaseColorInput = document.getElementById("negativephasecolor");
+
+            negativePhaseColorInput.addEventListener("change", () => {
+                const newValue = negativePhaseColorInput.value;
+
+                changeNegativePhaseColor(newValue);
+            });
+        </script>
+        <h3>Rotation Rate</h3>
+        <input id="rotationrate" type="number" value="0.003" min="0" max="0.1" step="0.01" />
+        <script type="module">
+            import { changeRotationRate } from './main.js'
+
+            const rotationRateInput = document.getElementById("rotationrate");
+
+            rotationRateInput.addEventListener("change", () => {
+                const newValue = rotationRateInput.value;
+
+                changeRotationRate(newValue);
+            });
+        </script>
+    </div>
+</body>
+
 </html>
