@@ -34,25 +34,31 @@ function generateWavefunctionSquared(numPoints, maxRadius) {
         const y = r * Math.sin(theta) * Math.sin(phi);
         const z = r * Math.cos(theta);
 
-        // Calculate |psi|^2 as proportional to r^2 * e^(-r) * cos^2(theta)
-        const density = Math.pow(r, 2) * Math.exp(-r) * Math.pow(Math.cos(theta), 2);
+        const rw = (1 / (9 * Math.sqrt(6))) * r * (4 - r) * (2.71828**(-1 * r / 2))
+        const aw = (x * Math.sqrt(3) / r) * (1 / (4 * 3.14159))**0.5
+        const psi = rw * aw;
 
-        if (density > 0.1) {
-            // Add vertex
+        console.log(psi**2)
+
+        if ((psi**2) > 0.00001) {
             vertices.push(x, y, z);
-        }
 
-        // Map density to color intensity (using green, change as desired)
-        const color = new THREE.Color(0x00ff00)//.multiplyScalar(density);
-        colors.push(color.r, color.g, color.b);
+            if (psi > 0) {
+                const color = new THREE.Color(0x00ff00).multiplyScalar(2**psi**2);
+                colors.push(color.r, color.g, color.b)
+            } else {
+                const color = new THREE.Color(0xff0000).multiplyScalar(2**psi**2);
+                colors.push(color.r, color.g, color.b)
+            }
+        }
     }
 
     return { vertices, colors };
 }
 
 // Generate points and colors
-const numPoints = 10000;
-const maxRadius = 25;
+const numPoints = 1000000;
+const maxRadius = 250;
 const { vertices, colors } = generateWavefunctionSquared(numPoints, maxRadius);
 
 // Create geometry and set the vertices and colors
@@ -61,7 +67,7 @@ geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3))
 geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
 // Set the material to use vertex colors
-const material = new THREE.PointsMaterial({ vertexColors: true, size: 0.05 });
+const material = new THREE.PointsMaterial({ vertexColors: true, size: 0.1 });
 const pointCloud = new THREE.Points(geometry, material);
 scene.add(pointCloud);
 
