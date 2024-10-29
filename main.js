@@ -4,9 +4,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 // TODO
 // ui to adjust params/orbital
 
-const orbital = {n: 3, l: 1, subshell: "y"}
+const orbital = {n: 3, l: 2, subshell: "z^2"}
 
-const numPoints = 1000000; // number of points initially generated
+const numPoints = 500000; // number of points initially generated
 const maxRadius = 50000; // radius of points initially generated
 const vertexRadius = 0.1 // radius of each point
 const thresholdProbability = 0.9; // removes this proportion of the points with the lowest density
