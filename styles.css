@@ -1,0 +1,30 @@
+body {
+    margin: 0;
+}
+
+canvas {
+    display: block;
+    margin-left: 200px;
+}
+
+.sidebar {
+    height: 100%;
+    width: 200px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #222222;
+}
+
+h1 {
+    margin-left: 20px;
+    font-family: 'Arial';
+    color: white;
+    font-size: 28px;
+}
+
+h3 {
+    margin-left: 10px;
+    font-family: 'Arial';
+    color: #cccccc;
+}
