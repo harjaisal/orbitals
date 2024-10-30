@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Orbital Visualization</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon-C6-cXYKo.ico?">
+  <script type="module" crossorigin src="/assets/index-BtQ4afRo.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BuZQbPEf.css">
+</head>
+
+<body>
+    <div class="sidebar">
+        <h1 style="font-weight: 1000; font-size: 26px">Orbitals of Hydrogen</h1>
+        <h2>Orbital Parameters</h2>
+        <h3>Principal Quantum Number (n)</h3>
+        <select id="shell">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+        </select>
+        <h3>Azimuthal Quantum Number (l)</h3>
+        <select id="subshell">
+            <option value="0 (s orbital)">0 (s orbital)</option>
+            <option value="1 (p orbitals)" selected>1 (p orbitals)</option>
+            <option value="2 (d orbitals)">2 (d orbitals)</option>
+        </select>
+        <h3>Orbital</h3>
+        <select id="orbital">
+            <option value="px" selected>px</option>
+            <option value="py">py</option>
+            <option value="pz">pz</option>
+        </select>
+        <h1>Zoom and rotate the orbital using your mouse!</h1>
+        <h2>Renderer Settings</h2>
+        <h3>Number of Points</h3>
+        <input id="numpoints" id="numpoints" type="number" value="500000" min="500" max="10000000" step="100000" />
+        <h3>Sampling Radius</h3>
+        <input id="samplingradius" type="number" value="50000" min=5000 max=1000000 step="10000" />
+        <h3>Probability Threshold</h3>
+        <input id="probabilitythreshold" type="number" value="0.9" min="0.01" max="0.99" step="0.01" />
+        <h3>Voxel Radius</h3>
+        <input id="voxelradius" type="number" value="0.1" min="0.01" max="5" step="0.1" />
+        <h3>Probability Coloring Mode</h3>
+        <select id="probabilitycoloringmode">
+            <option>Constant</option>
+            <option>Linear</option>
+            <option selected>Exponential</option>
+        </select>
+        <h3>Positive Phase Color</h3>
+        <input id="positivephasecolor" type="color" value="#ff0000" class="colorpicker" />
+        <h3>Negative Phase Color</h3>
+        <input id="negativephasecolor" type="color" value="#00ff00" class="colorpicker" />
+        <h3>Rotation Rate</h3>
+        <input id="rotationrate" type="number" value="0.003" min="0" max="0.1" step="0.01" />
+    </div>
+</body>
+
+</html>
