@@ -232,7 +232,7 @@ window.addEventListener('mouseup', () => {
 })
 
 function changeQuantumNums(newVal) {
-    quantumNums = {n: parseInt(newVal.n), l: parseInt(newVal.l), orbital: newVal.orbital)}
+    quantumNums = {n: parseInt(newVal.n), l: parseInt(newVal.l), orbital: newVal.orbital}
     
     const currentRotation = pointCloud.rotation
 
