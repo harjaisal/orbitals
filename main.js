@@ -264,6 +264,8 @@ function changeQuantumNums(newVal) {
 
 function changeN(newVal) {
     quantumNums.n = parseInt(newVal)
+
+    console.log(quantumNums)
     
     const currentRotation = pointCloud.rotation
 
@@ -293,6 +295,8 @@ function changeN(newVal) {
 
 function changeL(newVal) {
     quantumNums.l = parseInt(newVal)
+
+    console.log(quantumNums)
     
     const currentRotation = pointCloud.rotation
 
@@ -322,6 +326,8 @@ function changeL(newVal) {
 
 function changeOrbital(newVal) {
     quantumNums.orbital = newVal
+
+    console.log(quantumNums)
     
     const currentRotation = pointCloud.rotation
 
