@@ -2,32 +2,29 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // TODO
-// ui to adjust params/orbital
+// ui to adjust params/qnums
 
-const orbital = { n: 3, l: 1, subshell: "x" }
+let quantumNums = { n: 3, l: 1, orbital: "x" }
 
-const numPoints = 500000; // number of points initially generated
-const maxRadius = 50000; // radius of points initially generated
-const vertexRadius = 0.1 // radius of each point
-const thresholdProbability = 0.9; // removes this proportion of the points with the lowest density
+let numPoints = 500000; // number of points initially generated
+let maxRadius = 50000; // radius of points initially generated
+let thresholdProbability = 0.9; // removes this proportion of the points with the lowest density
+let vertexRadius = 0.1 // radius of each point
 let posPhaseColor = 0xff0000; // color in regions where psi is positive
 let negPhaseColor = 0x00ff00; // color in regions where psi is negative
 let rotationRate = 0.003 // controls speed of automatic rotation
-const probabilityColoringMode = 2 // 0: constant, 1: linear grad, 2: exponential grad
+let probabilityColoringMode = 2 // 0: constant, 1: linear grad, 2: exponential grad
 
 const initialZPosition = 17500; // initial camera position
 const sidebarWidth = 300; // width of sidebar
 
-const height = window.innerHeight
-const width = window.innerWidth - sidebarWidth
-
 let mousedown = false;
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, width / height, 0.01, 100000000);
+const camera = new THREE.PerspectiveCamera(75, (window.innerWidth - sidebarWidth) / window.innerHeight, 0.01, 100000000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 
-renderer.setSize(width, height);
+renderer.setSize(window.innerWidth - sidebarWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -38,66 +35,66 @@ camera.position.z = initialZPosition;
 camera.updateProjectionMatrix();
 controls.update();
 
-function wavefunction({ n, l, subshell }, { rho, theta, phi }) {
+function wavefunction({ n, l, orbital }, { rho, theta, phi }) {
     const a0 = 529 // scaled by 1000 to improve resolution
     const sigma = rho / a0
 
     if (n === 1) {
         if (l === 0) {
-            if (subshell === "N/A") {
+            if (orbital === "N/A") {
                 // 1s
                 return (1 / ((Math.PI ** 0.5) * (a0 ** 1.5))) * Math.exp(-sigma)
             }
         }
     } else if (n === 2) {
         if (l === 0) {
-            if (subshell === "N/A") {
+            if (orbital === "N/A") {
                 // 2s
                 return 1 / (4 * ((2 * Math.PI) ** 0.5) * (a0 ** 1.5)) * (2 - sigma) * Math.exp(-sigma / 2)
             }
         } else if (l === 1) {
-            if (subshell === "x") {
+            if (orbital === "x") {
                 // 2px
                 return 1 / (4 * ((2 * Math.PI) ** 0.5) * (a0 ** 1.5)) * sigma * Math.exp(-sigma / 2) * Math.sin(phi) * Math.cos(theta)
-            } else if (subshell === "y") {
+            } else if (orbital === "y") {
                 // 2py
                 return 1 / (4 * ((2 * Math.PI) ** 0.5) * (a0 ** 1.5)) * sigma * Math.exp(-sigma / 2) * Math.sin(phi) * Math.sin(theta)
-            } else if (subshell === "z") {
+            } else if (orbital === "z") {
                 // 2pz
                 return 1 / (4 * ((2 * Math.PI) ** 0.5) * (a0 ** 1.5)) * sigma * Math.exp(-sigma / 2) * Math.cos(phi)
             }
         }
     } else if (n === 3) {
         if (l === 0) {
-            if (subshell === "N/A") {
+            if (orbital === "N/A") {
                 // 3s
                 return 1 / (81 * ((3 * Math.PI) ** 0.5) * (a0 ** 1.5)) * (27 - 18 * sigma + 2 * (sigma ** 2)) * Math.exp(-sigma / 3)
             }
         } else if (l === 1) {
-            if (subshell === "x") {
+            if (orbital === "x") {
                 // 3px
                 return (2 ** 0.5) / (81 * (Math.PI ** 0.5) * (a0 ** 1.5)) * (6 * sigma - (sigma ** 2)) * Math.exp(-sigma / 3) * Math.sin(phi) * Math.cos(theta)
-            } else if (subshell === "y") {
+            } else if (orbital === "y") {
                 // 3py
                 return (2 ** 0.5) / (81 * (Math.PI ** 0.5) * (a0 ** 1.5)) * (6 * sigma - (sigma ** 2)) * Math.exp(-sigma / 3) * Math.sin(phi) * Math.sin(theta)
-            } else if (subshell === "z") {
+            } else if (orbital === "z") {
                 // 3pz
                 return (2 ** 0.5) / (81 * (Math.PI ** 0.5) * (a0 ** 1.5)) * (6 * sigma - (sigma ** 2)) * Math.exp(-sigma / 3) * Math.cos(phi)
             }
         } else if (l === 2) {
-            if (subshell === "xz") {
+            if (orbital === "xz") {
                 // 3dxz
                 return (2 ** 0.5) / (81 * (Math.PI ** 0.5) * (a0 ** 1.5)) * (sigma ** 2) * Math.exp(-sigma / 3) * Math.sin(phi) * Math.cos(phi) * Math.cos(theta)
-            } else if (subshell === "yz") {
+            } else if (orbital === "yz") {
                 // 3dyz
                 return (2 ** 0.5) / (81 * (Math.PI ** 0.5) * (a0 ** 1.5)) * (sigma ** 2) * Math.exp(-sigma / 3) * Math.sin(phi) * Math.cos(phi) * Math.sin(theta)
-            } else if (subshell === "xy") {
+            } else if (orbital === "xy") {
                 // 3dxy
                 return 1 / (81 * ((2 * Math.PI) ** 0.5) * (a0 ** 1.5)) * (sigma ** 2) * Math.exp(-sigma / 3) * (Math.sin(phi) ** 2) * Math.sin(2 * theta)
-            } else if (subshell === "z^2") {
+            } else if (orbital === "z^2") {
                 // 3dz^2
                 return 1 / (81 * ((6 * Math.PI) ** 0.5) * (a0 ** 1.5)) * (sigma ** 2) * Math.exp(-sigma / 3) * (3 * (Math.cos(phi) ** 2) - 1)
-            } else if (subshell === "x^2-y^2") {
+            } else if (orbital === "x^2-y^2") {
                 // 3dx^2-y^2
                 return 1 / (81 * ((2 * Math.PI) ** 0.5) * (a0 ** 1.5)) * (sigma ** 2) * Math.exp(-sigma / 3) * (Math.sin(phi) ** 2) * Math.cos(2 * theta)
             }
@@ -123,14 +120,14 @@ function genVertices(numPoints, maxRadius) {
     return vertices;
 }
 
-function genProbabiltyDensity(vertices) {
+function genProbabilityDensity(vertices) {
     const vertexData = []
     let maxDensity = 0
 
     for (let i = 0; i < vertices.length; i++) {
         const { x, y, z, rho, theta, phi } = vertices[i]
 
-        const psi = wavefunction(orbital, { rho: rho, theta: theta, phi: phi })
+        const psi = wavefunction(quantumNums, { rho: rho, theta: theta, phi: phi })
 
         const psiSquared = psi ** 2
 
@@ -194,20 +191,20 @@ function computeColorsFromProbability(vertexData, posPhaseColor, negPhaseColor, 
     return colors
 }
 
-const vertices = genVertices(numPoints, maxRadius)
-const { vertexData, maxDensity } = genProbabiltyDensity(vertices)
-const filteredVertexData = filterVerticesByDensity(vertexData, maxDensity, thresholdProbability)
-const colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
+let vertices = genVertices(numPoints, maxRadius)
+let { vertexData, maxDensity } = genProbabilityDensity(vertices)
+let filteredVertexData = filterVerticesByDensity(vertexData, maxDensity, thresholdProbability)
+let colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
 
-const vertexBufferFormat = filteredVertexData.flatMap((vertex) => [vertex.x, vertex.y, vertex.z])
-const colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
+let vertexBufferFormat = filteredVertexData.flatMap((vertex) => [vertex.x, vertex.y, vertex.z])
+let colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
 
-const geometry = new THREE.BufferGeometry();
+let geometry = new THREE.BufferGeometry();
 geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertexBufferFormat, 3));
 geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorBufferFormat, 3));
 
-const material = new THREE.PointsMaterial({ vertexColors: true, size: vertexRadius });
-const pointCloud = new THREE.Points(geometry, material);
+let material = new THREE.PointsMaterial({ vertexColors: true, size: vertexRadius });
+let pointCloud = new THREE.Points(geometry, material);
 scene.add(pointCloud);
 
 function animate() {
@@ -219,6 +216,7 @@ function animate() {
     }
     renderer.render(scene, camera);
 }
+
 animate();
 
 window.addEventListener('resize', () => {
@@ -236,19 +234,218 @@ window.addEventListener('mouseup', () => {
     mousedown = false;
 })
 
+function changeN(newVal) {
+    quantumNums.n = parseInt(newVal)
+
+    console.log(quantumNums)
+    
+    const currentRotation = pointCloud.rotation
+
+    if (pointCloud) {
+        scene.remove(pointCloud)
+    }
+
+    const probabilityDensityOutput = genProbabilityDensity(vertices)
+    vertexData = probabilityDensityOutput.vertexData
+    maxDensity = probabilityDensityOutput.maxDensity
+    filteredVertexData = filterVerticesByDensity(vertexData, maxDensity, thresholdProbability)
+    colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
+
+    vertexBufferFormat = filteredVertexData.flatMap((vertex) => [vertex.x, vertex.y, vertex.z])
+    colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
+
+    geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertexBufferFormat, 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorBufferFormat, 3));
+
+    material = new THREE.PointsMaterial({ vertexColors: true, size: vertexRadius });
+    pointCloud = new THREE.Points(geometry, material);
+    scene.add(pointCloud);
+
+    pointCloud.setRotationFromEuler(currentRotation)
+}
+
+function changeL(newVal) {
+    quantumNums.l = parseInt(newVal)
+    
+    const currentRotation = pointCloud.rotation
+
+    if (pointCloud) {
+        scene.remove(pointCloud)
+    }
+
+    const probabilityDensityOutput = genProbabilityDensity(vertices)
+    vertexData = probabilityDensityOutput.vertexData
+    maxDensity = probabilityDensityOutput.maxDensity
+    filteredVertexData = filterVerticesByDensity(vertexData, maxDensity, thresholdProbability)
+    colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
+
+    vertexBufferFormat = filteredVertexData.flatMap((vertex) => [vertex.x, vertex.y, vertex.z])
+    colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
+
+    geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertexBufferFormat, 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorBufferFormat, 3));
+
+    material = new THREE.PointsMaterial({ vertexColors: true, size: vertexRadius });
+    pointCloud = new THREE.Points(geometry, material);
+    scene.add(pointCloud);
+
+    pointCloud.setRotationFromEuler(currentRotation)
+}
+
+function changeOrbital(newVal) {
+    quantumNums.orbital = newVal
+    
+    const currentRotation = pointCloud.rotation
+
+    if (pointCloud) {
+        scene.remove(pointCloud)
+    }
+
+    const probabilityDensityOutput = genProbabilityDensity(vertices)
+    vertexData = probabilityDensityOutput.vertexData
+    maxDensity = probabilityDensityOutput.maxDensity
+    filteredVertexData = filterVerticesByDensity(vertexData, maxDensity, thresholdProbability)
+    colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
+
+    vertexBufferFormat = filteredVertexData.flatMap((vertex) => [vertex.x, vertex.y, vertex.z])
+    colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
+
+    geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertexBufferFormat, 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorBufferFormat, 3));
+
+    material = new THREE.PointsMaterial({ vertexColors: true, size: vertexRadius });
+    pointCloud = new THREE.Points(geometry, material);
+    scene.add(pointCloud);
+
+    pointCloud.setRotationFromEuler(currentRotation)
+}
+
+function changeNumPoints(newVal) {
+    numPoints = parseFloat(newVal)
+
+    const currentRotation = pointCloud.rotation
+
+    if (pointCloud) {
+        scene.remove(pointCloud)
+    }
+
+    vertices = genVertices(numPoints, maxRadius)
+    const probabilityDensityOutput = genProbabilityDensity(vertices)
+    vertexData = probabilityDensityOutput.vertexData
+    maxDensity = probabilityDensityOutput.maxDensity
+    filteredVertexData = filterVerticesByDensity(vertexData, maxDensity, thresholdProbability)
+    colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
+
+    vertexBufferFormat = filteredVertexData.flatMap((vertex) => [vertex.x, vertex.y, vertex.z])
+    colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
+
+    geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertexBufferFormat, 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorBufferFormat, 3));
+
+    material = new THREE.PointsMaterial({ vertexColors: true, size: vertexRadius });
+    pointCloud = new THREE.Points(geometry, material);
+    scene.add(pointCloud);
+
+    pointCloud.setRotationFromEuler(currentRotation)
+}
+
+function changeSamplingRadius(newVal) {
+    maxRadius = parseFloat(newVal)
+
+    const currentRotation = pointCloud.rotation
+
+    if (pointCloud) {
+        scene.remove(pointCloud)
+    }
+
+    vertices = genVertices(numPoints, maxRadius)
+    const probabilityDensityOutput = genProbabilityDensity(vertices)
+    vertexData = probabilityDensityOutput.vertexData
+    maxDensity = probabilityDensityOutput.maxDensity
+    filteredVertexData = filterVerticesByDensity(vertexData, maxDensity, thresholdProbability)
+    colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
+
+    vertexBufferFormat = filteredVertexData.flatMap((vertex) => [vertex.x, vertex.y, vertex.z])
+    colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
+
+    geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertexBufferFormat, 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorBufferFormat, 3));
+
+    material = new THREE.PointsMaterial({ vertexColors: true, size: vertexRadius });
+    pointCloud = new THREE.Points(geometry, material);
+    scene.add(pointCloud);
+
+    pointCloud.setRotationFromEuler(currentRotation)
+}
+
+function changeThresholdProbability(newVal) {
+    thresholdProbability = parseFloat(newVal)
+
+    const currentRotation = pointCloud.rotation
+
+    if (pointCloud) {
+        scene.remove(pointCloud)
+    }
+
+    filteredVertexData = filterVerticesByDensity(vertexData, maxDensity, thresholdProbability)
+    colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
+
+    vertexBufferFormat = filteredVertexData.flatMap((vertex) => [vertex.x, vertex.y, vertex.z])
+    colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
+
+    geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertexBufferFormat, 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorBufferFormat, 3));
+
+    material = new THREE.PointsMaterial({ vertexColors: true, size: vertexRadius });
+    pointCloud = new THREE.Points(geometry, material);
+    scene.add(pointCloud);
+
+    pointCloud.setRotationFromEuler(currentRotation)
+}
+
+function changeVertexRadius(newVal) {
+    vertexRadius = parseFloat(newVal)
+
+    const currentRotation = pointCloud.rotation
+
+    if (pointCloud) {
+        scene.remove(pointCloud)
+    }
+
+    material = new THREE.PointsMaterial({ vertexColors: true, size: vertexRadius });
+    pointCloud = new THREE.Points(geometry, material);
+    scene.add(pointCloud);
+
+    pointCloud.setRotationFromEuler(currentRotation)
+}
+
+function changeProbabilityColoringMode(newVal) {
+    probabilityColoringMode = parseInt(newVal);
+
+    colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
+    colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorBufferFormat, 3));
+}
+
 function changePositivePhaseColor(newVal) {
     posPhaseColor = parseInt(newVal.replace('#', '0x'), 16)
 
-    const colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
-    const colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
+    colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
+    colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorBufferFormat, 3));
 }
 
 function changeNegativePhaseColor(newVal) {
     negPhaseColor = parseInt(newVal.replace('#', '0x'), 16)
 
-    const colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
-    const colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
+    colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
+    colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorBufferFormat, 3));
 }
 
@@ -256,4 +453,4 @@ function changeRotationRate(newVal) {
     rotationRate = parseFloat(newVal)
 }
 
-export { changePositivePhaseColor, changeNegativePhaseColor, changeRotationRate }
+export { changeN, changeL, changeOrbital, changeNumPoints, changeSamplingRadius, changeThresholdProbability, changeVertexRadius, changeProbabilityColoringMode, changePositivePhaseColor, changeNegativePhaseColor, changeRotationRate }
