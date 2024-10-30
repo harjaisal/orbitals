@@ -116,7 +116,7 @@
         </script>
         <h1>Zoom and rotate the orbital using your mouse or finger!</h1>
         <h2>Renderer Settings</h2>
-        <h3>Number of Points</h3>
+        <h3>Number of Samples</h3>
         <input id="numpoints" id="numpoints" type="number" value="500000" min="500" max="10000000" step="100000" />
         <script type="module">
             import { changeNumPoints } from './main.js'
@@ -168,7 +168,7 @@
                 changeVertexRadius(newValue)
             });
         </script>
-        <h3>Probability Coloring Mode</h3>
+        <h3>Probability Gradient Mode</h3>
         <select id="probabilitycoloringmode">
             <option>Constant</option>
             <option>Linear</option>
