@@ -1,9 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// TODO
-// ui to adjust params/qnums
-
 let quantumNums = { n: 3, l: 1, orbital: "x" }
 
 let numPoints = 500000; // number of points initially generated
@@ -294,6 +291,64 @@ function changeN(newVal) {
     pointCloud.setRotationFromEuler(currentRotation)
 }
 
+function changeL(newVal) {
+    quantumNums.l = parseInt(newVal)
+    
+    const currentRotation = pointCloud.rotation
+
+    if (pointCloud) {
+        scene.remove(pointCloud)
+    }
+
+    const probabilityDensityOutput = genProbabilityDensity(vertices)
+    vertexData = probabilityDensityOutput.vertexData
+    maxDensity = probabilityDensityOutput.maxDensity
+    filteredVertexData = filterVerticesByDensity(vertexData, maxDensity, thresholdProbability)
+    colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
+
+    vertexBufferFormat = filteredVertexData.flatMap((vertex) => [vertex.x, vertex.y, vertex.z])
+    colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
+
+    geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertexBufferFormat, 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorBufferFormat, 3));
+
+    material = new THREE.PointsMaterial({ vertexColors: true, size: vertexRadius });
+    pointCloud = new THREE.Points(geometry, material);
+    scene.add(pointCloud);
+
+    pointCloud.setRotationFromEuler(currentRotation)
+}
+
+function changeOrbital(newVal) {
+    quantumNums.orbital = newVal
+    
+    const currentRotation = pointCloud.rotation
+
+    if (pointCloud) {
+        scene.remove(pointCloud)
+    }
+
+    const probabilityDensityOutput = genProbabilityDensity(vertices)
+    vertexData = probabilityDensityOutput.vertexData
+    maxDensity = probabilityDensityOutput.maxDensity
+    filteredVertexData = filterVerticesByDensity(vertexData, maxDensity, thresholdProbability)
+    colors = computeColorsFromProbability(filteredVertexData, posPhaseColor, negPhaseColor, maxDensity, probabilityColoringMode)
+
+    vertexBufferFormat = filteredVertexData.flatMap((vertex) => [vertex.x, vertex.y, vertex.z])
+    colorBufferFormat = colors.flatMap((color) => [color.r, color.g, color.b])
+
+    geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertexBufferFormat, 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorBufferFormat, 3));
+
+    material = new THREE.PointsMaterial({ vertexColors: true, size: vertexRadius });
+    pointCloud = new THREE.Points(geometry, material);
+    scene.add(pointCloud);
+
+    pointCloud.setRotationFromEuler(currentRotation)
+}
+
 function changeNumPoints(newVal) {
     numPoints = parseFloat(newVal)
 
@@ -424,4 +479,4 @@ function changeRotationRate(newVal) {
     rotationRate = parseFloat(newVal)
 }
 
-export { changeQuantumNums, changeN, changeNumPoints, changeSamplingRadius, changeThresholdProbability, changeVertexRadius, changeProbabilityColoringMode, changePositivePhaseColor, changeNegativePhaseColor, changeRotationRate }
+export { changeQuantumNums, changeN, changeL, changeOrbital, changeNumPoints, changeSamplingRadius, changeThresholdProbability, changeVertexRadius, changeProbabilityColoringMode, changePositivePhaseColor, changeNegativePhaseColor, changeRotationRate }
