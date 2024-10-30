@@ -32,7 +32,7 @@
             <option value="pz">pz</option>
         </select>
         <script type="module">
-            import { changeN, changeL, changeOrbital } from './main.js'
+            import { changeQuantumNums, changeN } from './main.js'
 
             const subshellData = { "1": ["0 (s orbital)"], "2": ["0 (s orbital)", "1 (p orbitals)"], "3": ["0 (s orbital)", "1 (p orbitals)", "2 (d orbitals)"] }
             const orbitalData = { "0 (s orbital)": ["N/A"], "1 (p orbitals)": ["px", "py", "pz"], "2 (d orbitals)": ["dxz", "dyz", "dxy", "dz^2", "dx^2-y^2"] }
@@ -74,15 +74,12 @@
                     });
                 }
 
-                changeN(selectedShell)
-
                 if (subshellData[selectedShell].includes(selectedSubshell)) {
                     orbitalDropdown.value = selectedOrbital
+                    changeN(selectedShell)
                 } else {
                     orbitalDropdown.value = "N/A"
-
-                    changeL(0)
-                    changeOrbital("N/A")
+                    changeQuantumNums({n: selectedShell, l: 0, orbital: "N/A"})
                 }
             })
 
