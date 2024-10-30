@@ -11,8 +11,8 @@
 
 <body>
     <div class="sidebar">
-        <h1>Parameters</h1>
-        <h2>Orbital Settings</h2>
+        <h1 style="font-weight: 1000; font-size: 26px">Orbitals of Hydrogen</h1>
+        <h2>Orbital Parameters</h2>
         <h3>Principal Quantum Number (n)</h3>
         <select id="shell">
             <option value="1">1</option>
@@ -34,17 +34,56 @@
         <script type="module">
             import { changeN, changeL, changeOrbital } from './main.js'
 
-            const subshellData = {"1": ["0 (s orbital)"], "2": ["0 (s orbital)", "1 (p orbitals)"], "3": ["0 (s orbital)", "1 (p orbitals)", "2 (d orbitals)"]}
+            const subshellData = { "1": ["0 (s orbital)"], "2": ["0 (s orbital)", "1 (p orbitals)"], "3": ["0 (s orbital)", "1 (p orbitals)", "2 (d orbitals)"] }
             const orbitalData = { "0 (s orbital)": ["N/A"], "1 (p orbitals)": ["px", "py", "pz"], "2 (d orbitals)": ["dxz", "dyz", "dxy", "dz^2", "dx^2-y^2"] }
 
-            const shellDropdown = document.getElementById("shell");
-            const subshellDropdown = document.getElementById("subshell");
-            const orbitalDropdown = document.getElementById("orbital");
+            let shellDropdown = document.getElementById("shell");
+            let subshellDropdown = document.getElementById("subshell");
+            let orbitalDropdown = document.getElementById("orbital");
 
             shellDropdown.addEventListener("change", () => {
                 const selectedShell = shellDropdown.value;
+                const selectedSubshell = subshellDropdown.value;
+                const selectedOrbital = orbitalDropdown.value;
+
+                subshellDropdown.innerHTML = "";
+
+                if (subshellData[selectedShell]) {
+                    subshellData[selectedShell].forEach(subshell => {
+                        const newOption = document.createElement("option");
+                        newOption.textContent = subshell;
+                        newOption.value = subshell;
+                        subshellDropdown.appendChild(newOption);
+                    })
+                }
+
+                if (subshellData[selectedShell].includes(selectedSubshell)) {
+                    subshellDropdown.value = selectedSubshell
+                } else {
+                    subshellDropdown.value = "0 (s orbital)"
+                }
+
+                orbitalDropdown.innerHTML = "";
+
+                if (orbitalData[subshellDropdown.value]) {
+                    orbitalData[subshellDropdown.value].forEach(orbital => {
+                        const newOption = document.createElement("option");
+                        newOption.textContent = orbital;
+                        newOption.value = orbital
+                        orbitalDropdown.appendChild(newOption);
+                    });
+                }
 
                 changeN(selectedShell)
+
+                if (subshellData[selectedShell].includes(selectedSubshell)) {
+                    orbitalDropdown.value = selectedOrbital
+                } else {
+                    orbitalDropdown.value = "N/A"
+
+                    changeL(0)
+                    changeOrbital("N/A")
+                }
             })
 
             subshellDropdown.addEventListener("change", () => {
@@ -75,7 +114,7 @@
                 changeOrbital(selectedOrbital.slice(1))
             })
         </script>
-        <h1>Zoom in and out, and rotate the orbital using your mouse!</h1>
+        <h1>Zoom and rotate the orbital using your mouse!</h1>
         <h2>Renderer Settings</h2>
         <h3>Number of Points</h3>
         <input id="numpoints" id="numpoints" type="number" value="500000" min="500" max="10000000" step="100000" />
