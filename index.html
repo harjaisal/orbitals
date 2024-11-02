@@ -167,7 +167,6 @@
         </script>
         <h3>Probability Gradient Mode</h3>
         <select id="probabilitycoloringmode">
-            <option>Constant</option>
             <option>Linear</option>
             <option selected>Exponential</option>
         </select>
@@ -179,9 +178,7 @@
             probabilityColorSelector.addEventListener("change", () => {
                 const newValue = probabilityColorSelector.value
 
-                if (newValue === "Constant") {
-                    changeProbabilityColoringMode(0)
-                } else if (newValue === "Linear") {
+                if (newValue === "Linear") {
                     changeProbabilityColoringMode(1)
                 } else if (newValue === "Exponential") {
                     changeProbabilityColoringMode(2)
